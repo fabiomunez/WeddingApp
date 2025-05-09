@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'provider',
+        'provider_id',
+        'avatar',
     ];
 
     /**
@@ -42,4 +45,49 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * The roles that belong to the user.
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * Check if the user has a specific role.
+     *
+     * @param string|array $roles
+     * @return bool
+     */
+    public function hasRole($roles)
+    {
+        if (is_string($roles)) {
+            return $this->roles->contains('name', $roles);
+        }
+
+        return (bool) $this->roles->whereIn('name', $roles)->count();
+    }
+
+    /**
+     * Check if the user has any of the given roles.
+     *
+     * @param array $roles
+     * @return bool
+     */
+    public function hasAnyRole(array $roles)
+    {
+        return (bool) $this->roles->whereIn('name', $roles)->count();
+    }
+
+    /**
+     * Check if the user has all of the given roles.
+     *
+     * @param array $roles
+     * @return bool
+     */
+    public function hasAllRoles(array $roles)
+    {
+        return $this->roles->whereIn('name', $roles)->count() === count($roles);
+    }
 }
